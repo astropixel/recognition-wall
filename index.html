@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recognition Wall</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #f9f9f9; 
+            padding: 20px; 
+            text-align: center; 
+        }
+        h1 { text-align: center; }
+        #feed-container {
+            max-width: 800px; 
+            margin: auto;
+        }
+        .feed-item { 
+            background: white; 
+            padding: 20px; 
+            margin: 20px auto; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center; 
+        }
+        .feed-item h2 { margin: 0; font-size: 22px; }
+        .feed-item a { text-decoration: none; color: #007BFF; }
+        .feed-content { margin-top: 10px; text-align: center; }
+        .feed-content img { 
+            max-width: 100%; 
+            height: auto; 
+            display: block; 
+            margin: 10px auto; 
+            border-radius: 5px; 
+        }
+    </style>
+</head>
+<body>
+    <h1>Recognition Wall</h1>
+    <div id="feed-container">
+        <div id="feed"></div>
+    </div>
+
+    <script>
+        async function fetchFeed() {
+            const response = await fetch("/api/get-feed");
+            const text = await response.text();
+            const parser = new DOMParser();
+            const xml = parser.parseFromString(text, "application/xml");
+
+            const entries = xml.querySelectorAll("entry");
+            let html = "";
+
+            entries.forEach(entry => {
+                let title = entry.querySelector("title")?.textContent || "No title";
+                
+                // FILTER OUT "happy birthday" (case insensitive)
+                if (title.toLowerCase().includes("happy birthday")) return;
+
+                let link = entry.querySelector("link")?.getAttribute("href") || "#";
+                let content = entry.querySelector("content")?.textContent || entry.querySelector("summary")?.textContent || "No content available.";
+
+                // Convert escaped HTML content into actual HTML
+                let contentDiv = document.createElement("div");
+                contentDiv.innerHTML = content;
+
+                html += `<div class="feed-item">
+                            <h2><a href="${link}" target="_blank">${title}</a></h2>
+                            <div class="feed-content">${contentDiv.innerHTML}</div>
+                         </div>`;
+            });
+
+            document.getElementById("feed").innerHTML = html;
+        }
+
+        fetchFeed();
+    </script>
+</body>
+</html>
