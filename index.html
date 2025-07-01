@@ -54,26 +54,20 @@
 
             entries.forEach(entry => {
                 let title = entry.querySelector("title")?.textContent || "No title";
-                
                 // FILTER OUT "happy birthday" (case insensitive)
                 if (title.toLowerCase().includes("happy birthday")) return;
-
                 let link = entry.querySelector("link")?.getAttribute("href") || "#";
                 let content = entry.querySelector("content")?.textContent || entry.querySelector("summary")?.textContent || "No content available.";
-
                 // Convert escaped HTML content into actual HTML
                 let contentDiv = document.createElement("div");
                 contentDiv.innerHTML = content;
-
                 html += `<div class="feed-item">
                             <h2><a href="${link}" target="_blank">${title}</a></h2>
                             <div class="feed-content">${contentDiv.innerHTML}</div>
                          </div>`;
             });
-
             document.getElementById("feed").innerHTML = html;
         }
-
         fetchFeed();
     </script>
 </body>
